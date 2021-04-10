@@ -1,0 +1,3 @@
+add_executable(reactortest reactortest.cc)
+target_link_libraries(reactortest glog)
+target_link_libraries(reactortest webserver_net)

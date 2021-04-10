@@ -1,5 +1,84 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:30
- * @LastEditTime: 2021-04-10 10:10:30
+ * @LastEditTime: 2021-04-10 21:01:35
  */
+#include <webserver/net/Epoll.h>
+#include <webserver/net/Channel.h>
+
+using namespace webserver;
+using namespace webserver::net;
+
+const int MaxReadyEventsNum = 4096;
+const int EpollWaitTime = 10000;
+
+Epoll::Epoll()
+    : epollFd(epoll_create1(EPOLL_CLOEXEC)),
+      readyEvents(MaxReadyEventsNum) {
+    assert(epollFd > 0);
+}
+
+Epoll::~Epoll() {}
+
+std::vector<ChannelPtr> Epoll::poll() {
+    while(true) {
+        auto readyEventsNum = epoll_wait(
+            epollFd,
+            readyEvents.data(),
+            readyEvents.size(),
+            EpollWaitTime
+        );
+        if(readyEventsNum < 0) {
+            LOG(INFO) << "epoll_wait timeout!";
+        } else {
+            std::vector<ChannelPtr> res;
+            decltype(channelPtrs.begin()) it;
+            for(int i=0; i<readyEventsNum; ++i) {
+                auto fd = readyEvents[i].data.fd;
+                if((it=channelPtrs.find(fd)) != channelPtrs.end()) {
+                    it->second->setRevents(readyEvents[i].events);
+                    res.emplace_back(it->second);
+                } else {
+                    LOG(ERROR) << "channelPtr(fd=" << fd << ") not exists";
+                }
+            }
+            return res;
+        }
+    }
+    return std::vector<ChannelPtr>();
+}
+
+void Epoll::updateChannel(ChannelPtr channelPtr) {
+    auto fd = channelPtr->getFd();
+    epoll_event event;
+    event.data.fd = fd;
+    event.events = channelPtr->getEvents();
+    if(channelPtrs.find(fd) == channelPtrs.end()) {
+        // 往事件表上注册fd上的事件
+        if(epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &event) < 0) {
+            // 操作失败
+            LOG(ERROR) << "epoll_add error!";
+        } else {
+            // 将channelPtr添加到channelPtrs
+            channelPtrs[fd] = channelPtr;
+            LOG(INFO) << "epoll_add(fd=" << fd << ") successful!";
+        }
+    } else {
+        // fd已存在，修改fd上的注册事件
+        if(epoll_ctl(epollFd, EPOLL_CTL_MOD, fd, &event) < 0) {
+            LOG(ERROR) << "epoll_mod error!";
+        }
+    }
+}
+
+void Epoll::removeChannel(ChannelPtr channelPtr) {
+    auto fd = channelPtr->getFd();
+    if(channelPtrs.find(fd) != channelPtrs.end()) {
+        if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
+            LOG(ERROR) << "epoll_del error!";
+        }
+        channelPtrs.erase(fd);        
+    } else {
+        LOG(WARNING) << "channel not exist";
+    }
+}
