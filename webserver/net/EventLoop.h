@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:51
- * @LastEditTime: 2021-04-10 19:01:57
+ * @LastEditTime: 2021-04-11 21:48:29
  */
 #pragma once
 #include <memory>
@@ -24,10 +24,12 @@ public:
     ~EventLoop();
 
     void updateChannel(ChannelPtr channelPtr);
-    void removeChannel(ChannelPtr ChannelPtr);
+    void removeChannel(int fd);
 
     void loop();
     void quit();
+
+    int getChannelSize();
 
 private:
     std::unique_ptr<Epoll> epollPtr;

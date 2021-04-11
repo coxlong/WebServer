@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:30
- * @LastEditTime: 2021-04-10 21:01:35
+ * @LastEditTime: 2021-04-11 21:48:01
  */
 #include <webserver/net/Epoll.h>
 #include <webserver/net/Channel.h>
@@ -71,8 +71,7 @@ void Epoll::updateChannel(ChannelPtr channelPtr) {
     }
 }
 
-void Epoll::removeChannel(ChannelPtr channelPtr) {
-    auto fd = channelPtr->getFd();
+void Epoll::removeChannel(const int fd) {
     if(channelPtrs.find(fd) != channelPtrs.end()) {
         if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
             LOG(ERROR) << "epoll_del error!";

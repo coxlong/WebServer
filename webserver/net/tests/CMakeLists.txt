@@ -1,3 +1,7 @@
 add_executable(reactortest reactortest.cc)
 target_link_libraries(reactortest glog)
 target_link_libraries(reactortest webserver_net)
+
+add_executable(tcpservertest tcpservertest.cc)
+target_link_libraries(tcpservertest glog)
+target_link_libraries(tcpservertest webserver_net)

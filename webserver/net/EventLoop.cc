@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:59
- * @LastEditTime: 2021-04-10 19:20:58
+ * @LastEditTime: 2021-04-11 21:48:38
  */
 #include <webserver/net/EventLoop.h>
 #include <webserver/net/Epoll.h>
@@ -22,8 +22,8 @@ void EventLoop::updateChannel(ChannelPtr channelPtr) {
     epollPtr->updateChannel(channelPtr);
 }
 
-void EventLoop::removeChannel(ChannelPtr channelPtr) {
-    epollPtr->removeChannel(channelPtr);
+void EventLoop::removeChannel(int fd) {
+    epollPtr->removeChannel(fd);
 }
 
 void EventLoop::loop() {
@@ -39,4 +39,8 @@ void EventLoop::loop() {
 
 void EventLoop::quit() {
     quited = true;
+}
+
+int EventLoop::getChannelSize() {
+    return epollPtr->getChannelSize();
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:07
- * @LastEditTime: 2021-04-10 20:22:27
+ * @LastEditTime: 2021-04-11 19:33:33
  */
 #pragma once
 #include <functional>
@@ -18,11 +18,12 @@ class Channel : NonCopyable, public std::enable_shared_from_this<Channel> {
 public:
     using EventCallback=std::function<void()>;
 
-    Channel(EventLoop* ownerLoop, int fd);
+    Channel(EventLoop* ownerLoop, const int fd);
     ~Channel();
 
     void handleEvents();
     void enableReading();
+    void enableWriting();
 
 public:
     int getFd() const {

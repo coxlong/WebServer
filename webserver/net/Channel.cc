@@ -1,9 +1,11 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:14
- * @LastEditTime: 2021-04-10 20:20:25
+ * @LastEditTime: 2021-04-11 21:41:38
  */
 #include <sys/epoll.h>
+
+#include <iostream>
 
 #include <webserver/net/Channel.h>
 #include <webserver/net/EventLoop.h>
@@ -11,7 +13,7 @@
 using namespace webserver;
 using namespace webserver::net;
 
-Channel::Channel(EventLoop* ownerLoop, int fd)
+Channel::Channel(EventLoop* ownerLoop, const int fd)
     : ownerLoop(ownerLoop),
       fd(fd),
       events(0),
@@ -21,11 +23,15 @@ Channel::Channel(EventLoop* ownerLoop, int fd)
 Channel::~Channel() {}
 
 void Channel::handleEvents() {
+    std::cerr << "channelSize: " << ownerLoop->getChannelSize() << std::endl;
     if(revents&EPOLLERR) {
         if(errorCallback) {
             errorCallback();
         }
-        return;
+        // LOG(INFO) << "delete1 Channel";
+        // std::cerr << "error";
+        // ownerLoop->removeChannel(shared_from_this());
+        // return;
     }
     if(revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
         if(readCallback) {
@@ -41,5 +47,10 @@ void Channel::handleEvents() {
 
 void Channel::enableReading() {
     events |= (EPOLLIN | EPOLLPRI);
+    ownerLoop->updateChannel(shared_from_this());
+}
+
+void Channel::enableWriting() {
+    events |= EPOLLOUT;
     ownerLoop->updateChannel(shared_from_this());
 }
