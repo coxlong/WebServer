@@ -4,6 +4,8 @@ set(webserver_net
     Channel.cc
     TCPServer.cc
     SocketUtils.cc
+    EventLoopThread.cc
+    EventLoopThreadPool.cc
 )
 
 add_library(webserver_net ${webserver_net})

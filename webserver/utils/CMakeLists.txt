@@ -1,2 +1,7 @@
-add_executable(glogtest glogTest.cc)
-target_link_libraries(glogtest glog)
+set(webserver_utils
+    Thread.cc
+)
+
+add_library(webserver_utils ${webserver_utils})
+
+add_subdirectory(tests)
