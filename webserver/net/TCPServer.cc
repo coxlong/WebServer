@@ -48,7 +48,7 @@ void TCPServer::newConnection() {
         LOG(ERROR) << "make_shared channel" << std::endl;
         // channelPtr->setWriteCallback(std::bind(sendMsg, connFd, "hello\n"));
         // channelPtr->enableWriting();
-        channelPtr->setReadCallback(std::bind(&TCPServer::handleRead, this, connFd, nextLoop->getTid()));
+        channelPtr->setReadCallback(std::bind(&TCPServer::handleRead, this, connFd, nextLoop));
         // channelPtr->enableReading();
         nextLoop->queueInLoop(std::bind(&Channel::enableReading, channelPtr));
         //sendMsg(connFd, "helloword!\n");
@@ -56,12 +56,16 @@ void TCPServer::newConnection() {
     }
 }
 
-void TCPServer::handleRead(int connFd, int loopTid) {
-    LOG(INFO) << "loopTid=" << loopTid;
+void TCPServer::handleRead(int connFd, EventLoop* loop) {
+    LOG(ERROR) << "connfd=" << connFd;
+    // LOG(ERROR) << "loopTid=" << loopTid;
     char buf[512];
     ssize_t len=0;
     if((len=recvMsg(connFd, buf, 512)) <= 0) {
-        eventLoop->removeChannel(connFd);
+        LOG(ERROR) << "len=" << len;
+        
+        loop->queueInLoop(std::bind(&EventLoop::removeChannel, loop, connFd));
+        // eventLoop->removeChannel(connFd);
     } else {
         buf[len] = '\0';
         LOG(ERROR) << buf;

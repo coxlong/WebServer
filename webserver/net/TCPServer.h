@@ -24,7 +24,7 @@ public:
     void start();
 
     void newConnection();
-    void handleRead(int connFd, int loopTid);
+    void handleRead(int connFd, EventLoop* loop);
 
 private:
     const int listenFd;

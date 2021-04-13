@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     webserver::net::EventLoop eventLoop;
     
-    webserver::net::TCPServer server(&eventLoop, 2);
+    webserver::net::TCPServer server(&eventLoop, 1);
 
     server.start();
     LOG(ERROR) << "server start";

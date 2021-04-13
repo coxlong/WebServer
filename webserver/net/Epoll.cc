@@ -22,15 +22,15 @@ Epoll::~Epoll() {}
 
 std::vector<ChannelPtr> Epoll::poll() {
     while(true) {
-        LOG(ERROR) << "epoll_wait begin";
+        // LOG(ERROR) << "epoll_wait begin";
         auto readyEventsNum = epoll_wait(
             epollFd,
             readyEvents.data(),
             readyEvents.size(),
             EpollWaitTime
         );
-        LOG(ERROR) << "epoll_wait end";
-        LOG(ERROR) << "readyEventsNum=" << readyEventsNum;
+        // LOG(ERROR) << "epoll_wait end";
+        // LOG(ERROR) << "readyEventsNum=" << readyEventsNum;
         if(readyEventsNum < 0) {
             LOG(ERROR) << "epoll_wait timeout!";
         } else {
@@ -53,6 +53,7 @@ std::vector<ChannelPtr> Epoll::poll() {
 
 void Epoll::updateChannel(ChannelPtr channelPtr) {
     auto fd = channelPtr->getFd();
+    LOG(ERROR) << "updateChannel: fd=" << fd;
     epoll_event event;
     event.data.fd = fd;
     event.events = channelPtr->getEvents();
@@ -75,12 +76,19 @@ void Epoll::updateChannel(ChannelPtr channelPtr) {
 }
 
 void Epoll::removeChannel(const int fd) {
+    LOG(ERROR) << "---";
+    LOG(ERROR) << "removeChannel: fd=" << fd;
+    for(auto c:channelPtrs) {
+        LOG(ERROR) << "channelFd:" << c.second->getFd();
+    }
+    LOG(ERROR) << "---";
     if(channelPtrs.find(fd) != channelPtrs.end()) {
         if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
             LOG(ERROR) << "epoll_del error!";
         }
-        channelPtrs.erase(fd);        
+        channelPtrs.erase(fd);
+        LOG(ERROR) << "channel delete successful";
     } else {
-        LOG(WARNING) << "channel not exist";
+        LOG(ERROR) << "channel not exist";
     }
 }
