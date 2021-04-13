@@ -34,7 +34,6 @@ void EventLoop::updateChannel(ChannelPtr channelPtr) {
 }
 
 void EventLoop::removeChannel(int fd) {
-    LOG(ERROR) << "fd=" << fd;
     assertInLoopThread();
     epollPtr->removeChannel(fd);
 }
@@ -64,14 +63,11 @@ void EventLoop::runInLoop(Functor&& cb) {
 }
 
 void EventLoop::queueInLoop(Functor&& cb) {
-    LOG(ERROR) << "call queueInLoop";
     {
         MutexLockGuard lock(mutex);
         pendingFunctors.emplace_back(std::move(cb));
-        LOG(ERROR) << "pendingFunctors size=" << pendingFunctors.size();
     }
     if(!isInLoopThread() || callingPendingFunctors) {
-        LOG(ERROR) << "call wakeup";
         wakeup();
     }
 }
@@ -81,19 +77,15 @@ int EventLoop::getChannelSize() {
 }
 
 void EventLoop::doPendingFunctors() {
-    // LOG(ERROR) << "call doPendingFunctors";
     std::vector<Functor> functors;
     callingPendingFunctors = true;
     {
         MutexLockGuard lock(mutex);
-        // LOG(ERROR) << "dopendingFunctors size=" << pendingFunctors.size();
         functors.swap(pendingFunctors);
-        LOG(ERROR) << "functors size=" << functors.size();
-        // LOG(ERROR) << "dopendingFunctors size=" << pendingFunctors.size();
     }
     for(auto func:functors) {
         func();
-    }    
+    }
     callingPendingFunctors = false;
 }
 

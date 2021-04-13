@@ -8,6 +8,7 @@
 #include<arpa/inet.h>
 #include <cstring>
 #include <unistd.h>
+#include <string>
 
 #include <webserver/net/SocketUtils.h>
 
@@ -23,8 +24,8 @@ int initSocket() {
     sockaddr_in address;
     bzero(&address, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_port = htons(8080);
-    inet_pton(AF_INET, "127.0.0.1", &address.sin_addr);
+    address.sin_port = htons(18080);
+    inet_pton(AF_INET, "", &address.sin_addr);
     
     if(bind(sockFd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1) {
         close(sockFd);
@@ -37,10 +38,16 @@ int listenSocket(int sockfd) {
     return listen(sockfd, 100);
 }
 
-int acceptConn(int sockfd) {
+int acceptConn(int sockfd, std::string& peerInfo) {
     sockaddr_in client;
     socklen_t len = sizeof(client);
-    return accept(sockfd, reinterpret_cast<sockaddr*>(&client), &len);
+    auto connfd = accept(sockfd, reinterpret_cast<sockaddr*>(&client), &len);
+    peerInfo = std::string(inet_ntoa(client.sin_addr)) + "::" + std::to_string(client.sin_port);
+    return connfd;
+}
+
+int closeConn(int sockfd) {
+    return close(sockfd);
 }
 
 void sendMsg(int connFd, std::string msg) {

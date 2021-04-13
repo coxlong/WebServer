@@ -7,6 +7,7 @@
 
 #include <webserver/net/Channel.h>
 #include <webserver/net/EventLoop.h>
+#include <webserver/net/SocketUtils.h>
 
 using namespace webserver;
 using namespace webserver::net;
@@ -18,18 +19,19 @@ Channel::Channel(EventLoop* ownerLoop, const int fd)
       revents(0) {
 }
 
-Channel::~Channel() {}
+Channel::~Channel() {
+    LOG(ERROR) << "~Channel()";
+    if(closeConn(fd) == 0) {
+        LOG(ERROR) << "closeConn successful";
+    }
+}
 
 void Channel::handleEvents() {
-    LOG(INFO) << "channelSize: " << ownerLoop->getChannelSize();
+    LOG(ERROR) << "revents=" << revents;
     if(revents&EPOLLERR) {
         if(errorCallback) {
             errorCallback();
         }
-        // LOG(INFO) << "delete1 Channel";
-        // std::cerr << "error";
-        // ownerLoop->removeChannel(shared_from_this());
-        // return;
     }
     if(revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
         if(readCallback) {

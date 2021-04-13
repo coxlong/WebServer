@@ -46,6 +46,8 @@ public:
         writeCallback = callback;
     }
 
+    EventLoop* getOwnerLoop() const { return ownerLoop; }
+
 private:
     EventLoop* ownerLoop;
     const int fd;

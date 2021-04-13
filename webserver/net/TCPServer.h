@@ -5,8 +5,10 @@
  */
 #pragma once
 #include <memory>
+#include <functional>
 
 #include <webserver/utils/NonCopyable.h>
+
 
 namespace webserver {
 namespace net {
@@ -15,6 +17,8 @@ class EventLoop;
 class Channel;
 class EventLoopThreadPool;
 using ChannelPtr=std::shared_ptr<Channel>;
+using ChannelWeakPtr=std::weak_ptr<Channel>;
+using ConnCallback=std::function<void(ChannelWeakPtr)>;
 
 class TCPServer : NonCopyable {
 public:
@@ -24,13 +28,13 @@ public:
     void start();
 
     void newConnection();
-    void handleRead(int connFd, EventLoop* loop);
 
 private:
     const int listenFd;
     EventLoop* eventLoop;
     ChannelPtr channelPtr;
     const int threadNum;
+    ConnCallback connReadCallback;
     std::unique_ptr<EventLoopThreadPool> eventLoopThreadPool;
 };
 

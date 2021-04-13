@@ -11,7 +11,8 @@ namespace net {
 
 int initSocket();
 int listenSocket(int sockfd);
-int acceptConn(int sockfd);
+int acceptConn(int sockfd, std::string& peerInfo);
+int closeConn(int sockfd);
 void sendMsg(int connFd, std::string msg);
 ssize_t recvMsg(int connFd, char *buf, int bufSize);
 
