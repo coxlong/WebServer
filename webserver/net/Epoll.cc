@@ -10,7 +10,7 @@ using namespace webserver;
 using namespace webserver::net;
 
 const int MaxReadyEventsNum = 4096;
-const int EpollWaitTime = 10000;
+const int EpollWaitTime = 5000;
 
 Epoll::Epoll()
     : epollFd(epoll_create1(EPOLL_CLOEXEC)),
@@ -22,14 +22,17 @@ Epoll::~Epoll() {}
 
 std::vector<ChannelPtr> Epoll::poll() {
     while(true) {
+        LOG(ERROR) << "epoll_wait begin";
         auto readyEventsNum = epoll_wait(
             epollFd,
             readyEvents.data(),
             readyEvents.size(),
             EpollWaitTime
         );
+        LOG(ERROR) << "epoll_wait end";
+        LOG(ERROR) << "readyEventsNum=" << readyEventsNum;
         if(readyEventsNum < 0) {
-            LOG(INFO) << "epoll_wait timeout!";
+            LOG(ERROR) << "epoll_wait timeout!";
         } else {
             std::vector<ChannelPtr> res;
             decltype(channelPtrs.begin()) it;

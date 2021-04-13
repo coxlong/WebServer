@@ -31,6 +31,7 @@ Thread::~Thread() {
 void* callFunc(void* funcP) {
     auto func = *reinterpret_cast<ThreadFunc*>(funcP);
     func();
+    return nullptr;
 }
 
 void Thread::start() {

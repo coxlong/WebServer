@@ -5,8 +5,6 @@
  */
 #include <sys/epoll.h>
 
-#include <iostream>
-
 #include <webserver/net/Channel.h>
 #include <webserver/net/EventLoop.h>
 
@@ -23,7 +21,7 @@ Channel::Channel(EventLoop* ownerLoop, const int fd)
 Channel::~Channel() {}
 
 void Channel::handleEvents() {
-    std::cerr << "channelSize: " << ownerLoop->getChannelSize() << std::endl;
+    LOG(INFO) << "channelSize: " << ownerLoop->getChannelSize();
     if(revents&EPOLLERR) {
         if(errorCallback) {
             errorCallback();

@@ -45,7 +45,9 @@ void EventLoop::loop() {
         for(auto channel:readyChannles) {
             channel->handleEvents();
         }
+        doPendingFunctors();
         eventHandling = false;
+        
     }
 }
 

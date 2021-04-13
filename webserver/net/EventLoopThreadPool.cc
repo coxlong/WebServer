@@ -5,7 +5,7 @@
  */
 #include <webserver/net/EventLoopThreadPool.h>
 #include <webserver/net/EventLoopThread.h>
-#include <iostream>
+#include <glog/logging.h>
 
 using namespace webserver;
 using namespace webserver::net;
@@ -22,7 +22,7 @@ EventLoopThreadPool::~EventLoopThreadPool() {}
 
 void EventLoopThreadPool::start() {
     for(int i=0; i<threadNum; ++i) {
-        std::cerr<<"eventloopthreadpool::start" << i <<std::endl;
+        LOG(INFO) <<"eventloopthreadpool::start" << i;
         auto tmp = std::make_shared<EventLoopThread>();
         loopThreads.push_back(tmp);
         loopVec.push_back(tmp->startLoop());

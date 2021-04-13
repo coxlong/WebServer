@@ -32,10 +32,10 @@ public:
     __uint32_t getEvents() const {
         return events;
     }
-    __uint32_t setEvents(const __uint32_t events) {
+    void setEvents(const __uint32_t events) {
         this->events = events;
     }
-    __uint32_t setRevents(const __uint32_t revents) {
+    void setRevents(const __uint32_t revents) {
         this->revents = revents;
     }
 
