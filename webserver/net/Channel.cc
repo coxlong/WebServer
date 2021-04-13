@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:14
- * @LastEditTime: 2021-04-11 21:41:38
+ * @LastEditTime: 2021-04-13 22:23:38
  */
 #include <sys/epoll.h>
 
@@ -27,7 +27,6 @@ Channel::~Channel() {
 }
 
 void Channel::handleEvents() {
-    LOG(ERROR) << "revents=" << revents;
     if(revents&EPOLLERR) {
         if(errorCallback) {
             errorCallback();

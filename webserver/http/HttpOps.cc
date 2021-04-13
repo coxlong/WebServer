@@ -1,7 +1,13 @@
+/*
+ * @Author: coxlong
+ * @Date: 2021-04-13 18:32:10
+ * @LastEditTime: 2021-04-13 23:17:41
+ */
 
 #include <glog/logging.h>
 
 #include <webserver/http/HttpOps.h>
+#include <webserver/http/HttpRequest.h>
 #include <webserver/net/Channel.h>
 #include <webserver/net/EventLoop.h>
 #include <webserver/net/SocketUtils.h>
@@ -10,25 +16,18 @@ using namespace webserver;
 using namespace webserver::net;
 
 void response(int connfd) {
-    std::string msg = "HTTP/1.1 200 OK\r\n\
-Date: Sun, 17 Mar 2013 08:12:54 GM\r\n\
-Server: Apache/2.2.8 (Win32) PHP/5.2.5\r\n\
-Pragma: no-cache\r\n\
-Content-Length: 4393\r\n\
-Keep-Alive: timeout=5, max=100\r\n\
-Connection: Keep-Alive\r\n\
-Content-Type: text/html; charset=utf-8\r\n\
-\n\r \
-<html>\r\n \
-<head>\
-<title>HTTP响应示例<title> \
-</head> \
-<body> \
-Hello HTTP! \
-</body> \
-</html>";
+    std::string msg = "HTTP/1.1 200 ok\r\n"
+"Date: Sun, 17 Mar 2013 08:12:54 GM\r\n"
+"Server: WebServer\r\n"
+"Pragma: no-cache\r\n"
+"Content-Length: 10\r\n"
+"Keep-Alive: timeout=5, max=100\r\n"
+"Connection: Keep-Alive\r\n"
+"Content-Type: text/html; charset=utf-8\r\n"
+"\r\n"
+"helloworld";
 
-    LOG(ERROR) << "sendsize=" << sendMsg(connfd, msg);
+    sendMsg(connfd, msg);
     // closeConn(connfd);
 
 }
@@ -42,14 +41,12 @@ void webserver::http::handleRead(ChannelWeakPtr channelWeakPtr) {
         char buf[512];
         ssize_t len=0;
         if((len=recvMsg(connFd, buf, 512)) <= 0) {
-            LOG(ERROR) << "len=" << len;
-            
+            // 对方已断开
             loop->queueInLoop(std::bind(&EventLoop::removeChannel, loop, connFd));
         } else {
-            buf[len] = '\0';
-            LOG(INFO) << "connfd=" << connFd;
-            LOG(INFO) << buf;
-            LOG(ERROR) << strtok(buf, "\n");
+            std::string s(buf);
+            HttpRequest request(s);
+            LOG(ERROR) << request.method;
             response(connFd);
         }
     } else {

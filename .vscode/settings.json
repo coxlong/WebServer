@@ -51,6 +51,8 @@
         "condition_variable": "cpp",
         "mutex": "cpp",
         "numeric": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }
