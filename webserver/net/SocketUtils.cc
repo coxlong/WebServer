@@ -50,8 +50,8 @@ int closeConn(int sockfd) {
     return close(sockfd);
 }
 
-void sendMsg(int connFd, std::string msg) {
-    write(connFd, msg.c_str(), msg.length());
+ssize_t sendMsg(int connFd, std::string msg) {
+    return write(connFd, msg.c_str(), msg.length());
 }
 
 ssize_t recvMsg(int connFd, char *buf, int bufSize) {
