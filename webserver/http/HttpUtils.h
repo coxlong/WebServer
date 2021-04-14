@@ -25,9 +25,15 @@ using VersionMap=std::unordered_map<Version, std::string>;
 extern StatusMap sDescriptions;
 extern StatusMap sCodes;
 extern VersionMap vMap;
+extern SSMap cTypeMap;
+extern char favicon[555];
 
 #define CRLF "\r\n"
 #define SPACE " "
+#define COLON ":"
+
+
+std::string getCurTime();
 
 }
 }

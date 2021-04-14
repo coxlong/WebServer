@@ -14,7 +14,7 @@ int listenSocket(int sockfd);
 int acceptConn(int sockfd, std::string& peerInfo);
 int closeConn(int sockfd);
 ssize_t sendMsg(int connFd, std::string msg);
-ssize_t recvMsg(int connFd, char *buf, int bufSize);
+ssize_t recvMsg(int connFd, std::string& buf);
 
 }
 }

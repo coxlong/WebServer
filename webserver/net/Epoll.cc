@@ -76,18 +76,18 @@ void Epoll::updateChannel(ChannelPtr channelPtr) {
 }
 
 void Epoll::removeChannel(const int fd) {
-    LOG(ERROR) << "---";
-    LOG(ERROR) << "removeChannel: fd=" << fd;
-    LOG(ERROR) << "channel num=" << channelPtrs.size();
-    for(auto c:channelPtrs) {
-        LOG(ERROR) << "channelFd:" << c.second->getFd();
-    }
-    LOG(ERROR) << "---";
+    // LOG(ERROR) << "---";
+    // LOG(ERROR) << "removeChannel: fd=" << fd;
+    // LOG(ERROR) << "channel num=" << channelPtrs.size();
+    // for(auto c:channelPtrs) {
+    //     LOG(ERROR) << "channelFd:" << c.second->getFd();
+    // }
+    // LOG(ERROR) << "---";
     if(channelPtrs.find(fd) != channelPtrs.end()) {
         if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
             LOG(ERROR) << "epoll_del error!";
         }
-        LOG(ERROR) << "count=" << channelPtrs.find(fd)->second.use_count();
+        // LOG(ERROR) << "count=" << channelPtrs.find(fd)->second.use_count();
         channelPtrs.erase(fd);
         // ::close(fd);
         LOG(ERROR) << "channel delete successful";

@@ -9,6 +9,8 @@
 #include <cstring>
 #include <unistd.h>
 #include <string>
+#include <iostream>
+#include <sstream>
 
 #include <webserver/net/SocketUtils.h>
 
@@ -54,8 +56,20 @@ ssize_t sendMsg(int connFd, std::string msg) {
     return write(connFd, msg.c_str(), msg.length());
 }
 
-ssize_t recvMsg(int connFd, char *buf, int bufSize) {
-    return read(connFd, buf, bufSize);
+ssize_t recvMsg(int connFd, std::string& sbuf) {
+    char buf[1024];
+    
+    sbuf.clear();
+
+    ssize_t readN;
+    while((readN=read(connFd, buf, 1024))>0) {
+        sbuf.append(buf, readN);
+        if(readN != 1024) {
+            break;
+        }
+    }
+
+    return sbuf.size();
 }
 
 }

@@ -16,33 +16,32 @@
 using namespace webserver;
 using namespace webserver::net;
 
-void sendResponse(int connfd, const std::string& msg) {
-
-    sendMsg(connfd, msg);
-    // closeConn(connfd);
-
-}
-
-void webserver::http::handleRead(ChannelWeakPtr channelWeakPtr) {
+void http::handleRead(ChannelWeakPtr channelWeakPtr) {
     auto channelPtr = channelWeakPtr.lock();
     if(channelPtr) {
         auto connFd = channelPtr->getFd();
         auto loop = channelPtr->getOwnerLoop();
         LOG(ERROR) << "connfd=" << connFd;
-        char buf[512];
+        // char buf[4096];
+        std::string buf;
         ssize_t len=0;
-        if((len=recvMsg(connFd, buf, 512)) <= 0) {
+        if((len=recvMsg(connFd, buf)) <= 0) {
             // 对方已断开
             loop->queueInLoop(std::bind(&EventLoop::removeChannel, loop, connFd));
         } else {
-            std::string s(buf);
-            HttpRequest request(s);
+            HttpRequest request(buf);
+            // LOG(ERROR) << buf;
+            LOG(ERROR) << "method=" << request.method;
+            if(request.method==Invalid) {
+                LOG(ERROR) << buf;
+            }
+            // len = recvMsg(connFd, buf, 4096);
+            // request.setRequestData(std::string(buf, len));
+            
             HttpResponse response;
-            std::string msg("helloworld");
-            response.setContext(msg);
-            response.setHeader("Content-Length", std::to_string(msg.size()));
-            response.setStatus(HttpStatusCode::S200);
+            response.handleRequest(request);
             sendMsg(connFd, response.toMsg());
+            // loop->queueInLoop(std::bind(&EventLoop::removeChannel, loop, connFd));
         }
     } else {
         LOG(ERROR) << "channelWeakPtr is expired";

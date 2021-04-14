@@ -15,8 +15,11 @@ class EventLoop;
 class Channel;
 }
 using ChannelWeakPtr=std::weak_ptr<net::Channel>;
-// using ConnCallback=std::function<void(ChannelWeakPtr)>;
 namespace http {
+
+class HttpRequest;
+class HttpResponse;
+
 void handleRead(ChannelWeakPtr channelPtr);
 }
 }

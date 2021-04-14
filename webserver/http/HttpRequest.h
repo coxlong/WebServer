@@ -24,12 +24,13 @@ public:
           URL(),
           requestData(),
           headers() {
-        auto i=buf.find("\r\n");
+        auto i=buf.find(CRLF);
         if(i!=std::string::npos) {
             auto firstLine=buf.substr(0, i);
-            std::regex ws_re(" ");
+            std::regex ws_re(SPACE);
             std::vector<std::string> line(std::sregex_token_iterator(firstLine.begin(), firstLine.end(), ws_re, -1), std::sregex_token_iterator());
             if(line.size() == 3) {
+                LOG(ERROR) << "line[0]" << line[0];
                 // 设置请求行
                 if(line[0]=="GET") {
                     method = GET;
@@ -37,7 +38,7 @@ public:
                     return;
                 }
                 URL = line[1];
-                if(line[2]=="HTTP/1.1") {
+                if(line[2]==vMap[http11]) {
                     version = http11;
                 } else {
                     method = Invalid;
@@ -47,28 +48,35 @@ public:
                 // 设置请求头部
                 auto len = buf.size();
                 i += 2;
-                std::regex ws_re2(":");
+                std::regex ws_re2(COLON);
                 while(i<len) {
-                    auto j=buf.find("\r\n", i);
+                    auto j=buf.find(CRLF, i);
                     if(j==i) {
                         // 设置请求数据
                         requestData = buf.substr(j+2);
                         break;
                     } else if(j==std::string::npos) {
-                        method = Invalid;
-                        return;
+                        j = len;
                     }
-                    auto k=buf.find(":", i);
+                    auto k=buf.find(COLON, i);
                     if(k>i && k<j) {
                         headers[buf.substr(i, k-i)] = buf.substr(k+1, j-k-1);
                     } else {
-                        method = Invalid;
+                        // method = Invalid;
                         return;
                     }
                     i=j+2;
                 }
             }
         }
+        LOG(ERROR) << "URL: " << URL;
+        for(auto h:headers) {
+            LOG(ERROR) << "key: " << h.first << " value: " << h.second;
+        }
+    }
+
+    void setRequestData(std::string&& data) {
+        requestData = data;
     }
 
 public:
