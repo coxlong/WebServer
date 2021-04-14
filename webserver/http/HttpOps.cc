@@ -8,6 +8,7 @@
 
 #include <webserver/http/HttpOps.h>
 #include <webserver/http/HttpRequest.h>
+#include <webserver/http/HttpResponse.h>
 #include <webserver/net/Channel.h>
 #include <webserver/net/EventLoop.h>
 #include <webserver/net/SocketUtils.h>
@@ -15,17 +16,7 @@
 using namespace webserver;
 using namespace webserver::net;
 
-void response(int connfd) {
-    std::string msg = "HTTP/1.1 200 ok\r\n"
-"Date: Sun, 17 Mar 2013 08:12:54 GM\r\n"
-"Server: WebServer\r\n"
-"Pragma: no-cache\r\n"
-"Content-Length: 10\r\n"
-"Keep-Alive: timeout=5, max=100\r\n"
-"Connection: Keep-Alive\r\n"
-"Content-Type: text/html; charset=utf-8\r\n"
-"\r\n"
-"helloworld";
+void sendResponse(int connfd, const std::string& msg) {
 
     sendMsg(connfd, msg);
     // closeConn(connfd);
@@ -46,8 +37,12 @@ void webserver::http::handleRead(ChannelWeakPtr channelWeakPtr) {
         } else {
             std::string s(buf);
             HttpRequest request(s);
-            LOG(ERROR) << request.method;
-            response(connFd);
+            HttpResponse response;
+            std::string msg("helloworld");
+            response.setContext(msg);
+            response.setHeader("Content-Length", std::to_string(msg.size()));
+            response.setStatus(HttpStatusCode::S200);
+            sendMsg(connFd, response.toMsg());
         }
     } else {
         LOG(ERROR) << "channelWeakPtr is expired";

@@ -10,17 +10,12 @@
 #include <glog/logging.h>
 
 #include <webserver/utils/NonCopyable.h>
+#include <webserver/http/HttpUtils.h>
 
 namespace webserver {
 namespace http {
 class HttpRequest : NonCopyable {
 public:
-enum Method {
-    GET, POST, Invalid
-};
-enum Version {
-    http10, http11, unknown
-};
 
 public:
     explicit HttpRequest(const std::string& buf)
@@ -81,7 +76,7 @@ public:
     Version version;
     std::string URL;
     std::string requestData;
-    std::unordered_map<std::string, std::string> headers;
+    SSMap headers;
 };
 }
 }

@@ -10,7 +10,7 @@ using namespace webserver;
 using namespace webserver::net;
 
 const int MaxReadyEventsNum = 4096;
-const int EpollWaitTime = 5000;
+const int EpollWaitTime = 1;
 
 Epoll::Epoll()
     : epollFd(epoll_create1(EPOLL_CLOEXEC)),
