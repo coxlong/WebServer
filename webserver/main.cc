@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
- * @Date: 2021-04-11 17:18:28
- * @LastEditTime: 2021-04-15 22:05:06
+ * @Date: 2021-04-15 22:04:49
+ * @LastEditTime: 2021-04-15 22:08:04
  */
 #include <webserver/net/TCPServer.h>
 #include <webserver/net/EventLoop.h>
@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 
     webserver::net::EventLoop eventLoop;
     
-    webserver::net::TCPServer server(&eventLoop, 3);
+    webserver::net::TCPServer server(&eventLoop, 5);
 
     server.start();
     LOG(ERROR) << "server start";
