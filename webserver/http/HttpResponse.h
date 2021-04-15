@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <webserver/utils/NonCopyable.h>
 #include <webserver/http/HttpUtils.h>
 
@@ -21,7 +20,7 @@ public:
 
     std::string toMsg();
 private:
-    void parseURL(const std::string& URL);
+    void parseURL(std::string URL);
     void NotFound();
 
 private:

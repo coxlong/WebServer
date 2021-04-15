@@ -10,7 +10,8 @@ using namespace webserver::http;
 StatusMap http::sDescriptions{
     { S200, "OK" },
     { S400, "Bad Request" },
-    { S404, "Not Found" }
+    { S404, "Not Found" },
+    { S500, "Internal Server Error" }
 };
 
 StatusMap http::sCodes{
@@ -32,6 +33,9 @@ SSMap http::cTypeMap {
     { ".css", "text/css" },
     { ".ico", "image/x-icon" }
 };
+
+
+const std::string http::wwwroot("/home/xlong/RemoteWorking/WebServer/html");
 
 std::string http::getCurTime() {
     auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

@@ -70,9 +70,9 @@ public:
             }
         }
         LOG(ERROR) << "URL: " << URL;
-        for(auto h:headers) {
-            LOG(ERROR) << "key: " << h.first << " value: " << h.second;
-        }
+        // for(auto h:headers) {
+        //     LOG(ERROR) << "key: " << h.first << " value: " << h.second;
+        // }
     }
 
     void setRequestData(std::string&& data) {

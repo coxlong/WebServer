@@ -1,4 +1,6 @@
 
+#include <fstream>
+
 #include <glog/logging.h>
 
 #include <webserver/http/HttpResponse.h>
@@ -12,19 +14,18 @@ HttpResponse::HttpResponse()
       version(http11),
       headers() {
     headers["Date"] = getCurTime();
+    headers["Server"] = "WebServer/1.0";
 }
 
 HttpResponse::~HttpResponse() {}
 
 void HttpResponse::handleRequest(const HttpRequest& request) {
-    // LOG(ERROR) << "method=" << request.method;
     if(request.method == GET) {
         parseURL(request.URL);
     } else if(request.method == POST) {
         // TODO
     }
 }
-
 
 std::string HttpResponse::toMsg() {
     std::string res=vMap[version] + SPACE + sCodes[status] + SPACE + sDescriptions[status] + CRLF;
@@ -39,16 +40,43 @@ std::string HttpResponse::toMsg() {
     return res;
 }
 
-
-void HttpResponse::parseURL(const std::string& URL) {
+void HttpResponse::parseURL(std::string URL) {
     if(URL == "/favicon.ico") {
         status = S200;
         headers["Content-Type"] = cTypeMap.at(".ico");
         context = std::string(favicon, 555);
-    } else {
+        return;
+    }
+    if(*URL.rbegin() == '/') {
+        URL += "index.html";
+    }
+    auto it=URL.rfind(".");
+    if(it == std::string::npos) {
+        NotFound();
+        return;
+    }
+    auto fileType = URL.substr(it);
+    LOG(ERROR) << "fileType=" << fileType;
+    auto filename = wwwroot+URL;
+    LOG(ERROR) << "filename=" << filename;
+    if(std::ifstream is{filename, std::ios::binary | std::ios::ate}) {
         status = S200;
-        context = "hello";
+        auto size=is.tellg();
+        LOG(ERROR) << "size=" << size;
+        std::string str(size, '\0');
+        is.seekg(0);
+        if(!is.read(&str[0], size)) {
+            NotFound();
+            return;
+        }
+        str.swap(context);
         headers["Content-Length"] = std::to_string(context.size());
+        if(cTypeMap.find(fileType)!=cTypeMap.end()) {
+            headers["Content-Type"] = cTypeMap[fileType];
+        }
+    } else {
+        LOG(ERROR) << "can't open the file";
+        NotFound();
     }
 }
 

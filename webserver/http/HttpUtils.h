@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <unordered_map>
 #include <string>
 
@@ -15,7 +14,7 @@ enum Version {
 };
 
 enum HttpStatusCode {
-    S200, S404, S400
+    S200, S404, S400, S500
 };
 
 using StatusMap=std::unordered_map<HttpStatusCode, std::string>;
@@ -27,11 +26,11 @@ extern StatusMap sCodes;
 extern VersionMap vMap;
 extern SSMap cTypeMap;
 extern char favicon[555];
+extern const std::string wwwroot;
 
 #define CRLF "\r\n"
 #define SPACE " "
 #define COLON ":"
-
 
 std::string getCurTime();
 

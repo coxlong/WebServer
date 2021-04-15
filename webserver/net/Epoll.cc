@@ -10,7 +10,7 @@ using namespace webserver;
 using namespace webserver::net;
 
 const int MaxReadyEventsNum = 4096;
-const int EpollWaitTime = 1;
+const int EpollWaitTime = 10000;
 
 Epoll::Epoll()
     : epollFd(epoll_create1(EPOLL_CLOEXEC)),
@@ -22,18 +22,13 @@ Epoll::~Epoll() {}
 
 std::vector<ChannelPtr> Epoll::poll() {
     while(true) {
-        // LOG(ERROR) << "epoll_wait begin";
         auto readyEventsNum = epoll_wait(
             epollFd,
             readyEvents.data(),
             readyEvents.size(),
             EpollWaitTime
         );
-        // LOG(ERROR) << "epoll_wait end";
-        // LOG(ERROR) << "readyEventsNum=" << readyEventsNum;
-        if(readyEventsNum < 0) {
-            LOG(ERROR) << "epoll_wait timeout!";
-        } else {
+        if(readyEventsNum > 0) {
             std::vector<ChannelPtr> res;
             decltype(channelPtrs.begin()) it;
             for(int i=0; i<readyEventsNum; ++i) {
@@ -42,10 +37,14 @@ std::vector<ChannelPtr> Epoll::poll() {
                     it->second->setRevents(readyEvents[i].events);
                     res.emplace_back(it->second);
                 } else {
-                    LOG(ERROR) << "channelPtr(fd=" << fd << ") not exists";
+                    LOG(ERROR) << "channel(fd=" << fd << ") not exists";
                 }
             }
             return res;
+        } else if(readyEventsNum == 0) {            
+            LOG(INFO) << "epoll_wait timeout!";
+        } else {
+            LOG(ERROR) << "epoll_wait error! errno=" << errno;
         }
     }
     return std::vector<ChannelPtr>();
@@ -53,7 +52,7 @@ std::vector<ChannelPtr> Epoll::poll() {
 
 void Epoll::updateChannel(ChannelPtr channelPtr) {
     auto fd = channelPtr->getFd();
-    LOG(ERROR) << "updateChannel: fd=" << fd;
+    LOG(INFO) << "updateChannel: fd=" << fd;
     epoll_event event;
     event.data.fd = fd;
     event.events = channelPtr->getEvents();
@@ -76,22 +75,15 @@ void Epoll::updateChannel(ChannelPtr channelPtr) {
 }
 
 void Epoll::removeChannel(const int fd) {
-    // LOG(ERROR) << "---";
-    // LOG(ERROR) << "removeChannel: fd=" << fd;
-    // LOG(ERROR) << "channel num=" << channelPtrs.size();
-    // for(auto c:channelPtrs) {
-    //     LOG(ERROR) << "channelFd:" << c.second->getFd();
-    // }
-    // LOG(ERROR) << "---";
     if(channelPtrs.find(fd) != channelPtrs.end()) {
         if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
-            LOG(ERROR) << "epoll_del error!";
+            LOG(ERROR) << "epoll_del error! errno=" << errno;
+        } else {
+            LOG(INFO) << "epoll_del successful!";
         }
-        // LOG(ERROR) << "count=" << channelPtrs.find(fd)->second.use_count();
         channelPtrs.erase(fd);
-        // ::close(fd);
-        LOG(ERROR) << "channel delete successful";
+        LOG(INFO) << "channel delete successful";
     } else {
-        LOG(ERROR) << "channel not exist";
+        LOG(ERROR) << "channel not exists";
     }
 }
