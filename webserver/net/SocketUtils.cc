@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-11 16:02:00
- * @LastEditTime: 2021-04-11 21:18:38
+ * @LastEditTime: 2021-04-15 19:27:06
  */
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -62,20 +62,8 @@ ssize_t sendMsg(int connFd, std::string msg) {
     return res;
 }
 
-ssize_t recvMsg(int connFd, std::string& sbuf) {
-    char buf[4096];
-    
-    sbuf.clear();
-
-    ssize_t readN;
-    while((readN=read(connFd, buf, 1024))>0) {
-        sbuf.append(buf, readN);
-        if(readN != 4096) {
-            break;
-        }
-    }
-
-    return sbuf.size();
+ssize_t recvMsg(int connFd, std::string& buf) {
+    return read(connFd, &buf[0], buf.size());
 }
 
 }

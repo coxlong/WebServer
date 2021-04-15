@@ -1,3 +1,8 @@
+/*
+ * @Author: coxlong
+ * @Date: 2021-04-15 18:46:10
+ * @LastEditTime: 2021-04-15 18:47:14
+ */
 #include <chrono>
 #include <sstream>
 #include <iomanip>
@@ -35,7 +40,7 @@ SSMap http::cTypeMap {
 };
 
 
-const std::string http::wwwroot("/home/xlong/RemoteWorking/WebServer/html");
+const std::string http::wwwroot("/home/xlong/workspace/reference");
 
 std::string http::getCurTime() {
     auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

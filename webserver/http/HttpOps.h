@@ -7,7 +7,6 @@
 #include <memory>
 #include <functional>
 
-
 namespace webserver {
 
 namespace net {

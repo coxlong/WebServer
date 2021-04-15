@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-13 20:44:10
- * @LastEditTime: 2021-04-13 23:16:13
+ * @LastEditTime: 2021-04-15 19:39:47
  */
 #include <string>
 #include <regex>
@@ -18,12 +18,15 @@ class HttpRequest : NonCopyable {
 public:
 
 public:
-    explicit HttpRequest(const std::string& buf)
-        : method(Invalid),
-          version(unknown),
-          URL(),
-          requestData(),
-          headers() {
+    HttpRequest();
+    bool init(int fd);
+
+        // : method(Invalid),
+        //   version(unknown),
+        //   URL(),
+        //   requestData(),
+        //   headers() {
+#if 0
         auto i=buf.find(CRLF);
         if(i!=std::string::npos) {
             auto firstLine=buf.substr(0, i);
@@ -69,11 +72,12 @@ public:
                 }
             }
         }
-        LOG(ERROR) << "URL: " << URL;
-        // for(auto h:headers) {
-        //     LOG(ERROR) << "key: " << h.first << " value: " << h.second;
-        // }
-    }
+#endif
+    //     LOG(ERROR) << "URL: " << URL;
+    //     // for(auto h:headers) {
+    //     //     LOG(ERROR) << "key: " << h.first << " value: " << h.second;
+    //     // }
+    // }
 
     void setRequestData(std::string&& data) {
         requestData = data;

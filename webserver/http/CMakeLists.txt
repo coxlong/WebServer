@@ -1,6 +1,7 @@
 set(webserver_http
     HttpOps.cc
     HttpUtils.cc
+    HttpRequest.cc
     HttpResponse.cc
 )
 
