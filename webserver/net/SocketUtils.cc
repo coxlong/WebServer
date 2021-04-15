@@ -12,6 +12,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <glog/logging.h>
+
 #include <webserver/net/SocketUtils.h>
 
 namespace webserver {
@@ -53,18 +55,22 @@ int closeConn(int sockfd) {
 }
 
 ssize_t sendMsg(int connFd, std::string msg) {
-    return write(connFd, msg.c_str(), msg.length());
+    auto res = write(connFd, msg.c_str(), msg.length());
+    if(res==-1) {
+        LOG(ERROR) << "wite error errno=" << errno;
+    }
+    return res;
 }
 
 ssize_t recvMsg(int connFd, std::string& sbuf) {
-    char buf[1024];
+    char buf[4096];
     
     sbuf.clear();
 
     ssize_t readN;
     while((readN=read(connFd, buf, 1024))>0) {
         sbuf.append(buf, readN);
-        if(readN != 1024) {
+        if(readN != 4096) {
             break;
         }
     }

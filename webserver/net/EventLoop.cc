@@ -3,9 +3,12 @@
  * @Date: 2021-04-10 10:09:59
  * @LastEditTime: 2021-04-12 23:12:11
  */
+#include <sys/eventfd.h>
+
 #include <webserver/net/EventLoop.h>
 #include <webserver/net/Epoll.h>
 #include <webserver/net/Channel.h>
+#include <webserver/net/SocketUtils.h>
 
 using namespace webserver;
 using namespace webserver::net;
@@ -19,9 +22,13 @@ EventLoop::EventLoop()
       threadId(CurrentThread::tid()),
       pendingFunctors(0),
       mutex(),
-      callingPendingFunctors(false) {
+      callingPendingFunctors(false),
+      wakeupFd(createEventFd()),
+      wakeupChannel(std::make_shared<Channel>(this, wakeupFd)) {
     assert(t_eventLoop == nullptr);
     t_eventLoop = this;
+    wakeupChannel->setReadCallback(std::bind(&EventLoop::handleWakeup, this));
+    wakeupChannel->enableReading();
 }
 
 EventLoop::~EventLoop() {
@@ -90,5 +97,21 @@ void EventLoop::doPendingFunctors() {
 }
 
 void EventLoop::wakeup() {
-    // TODO
+    std::string one(8, '1');
+    if(sendMsg(wakeupFd, one) != static_cast<ssize_t>(one.size())) {
+        LOG(ERROR) << "wakeup failure";
+    }
+}
+
+void EventLoop::handleWakeup() {
+    std::string buf;
+    recvMsg(wakeupFd, buf);
+}
+
+int EventLoop::createEventFd() {
+    int fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if(fd < 0) {
+        LOG(FATAL) << "createEventFd failed";
+    }
+    return fd;
 }

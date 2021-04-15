@@ -43,6 +43,8 @@ public:
 private:
     void doPendingFunctors();
     void wakeup();
+    void handleWakeup();
+    int createEventFd();
 
 private:
     std::unique_ptr<Epoll> epollPtr;
@@ -52,6 +54,8 @@ private:
     std::vector<Functor> pendingFunctors;
     Mutex mutex;
     bool callingPendingFunctors;
+    const int wakeupFd;
+    ChannelPtr wakeupChannel;
 };
 }
 }
