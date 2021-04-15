@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:14
- * @LastEditTime: 2021-04-13 22:23:38
+ * @LastEditTime: 2021-04-15 22:03:12
  */
 #include <sys/epoll.h>
 
@@ -20,9 +20,8 @@ Channel::Channel(EventLoop* ownerLoop, const int fd)
 }
 
 Channel::~Channel() {
-    LOG(ERROR) << "~Channel()";
     if(closeConn(fd) == 0) {
-        LOG(ERROR) << "closeConn successful";
+        LOG(INFO) << "closeConn successful";
     }
 }
 

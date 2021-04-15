@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 18:46:10
- * @LastEditTime: 2021-04-15 18:46:59
+ * @LastEditTime: 2021-04-15 21:53:09
  */
 #include <fstream>
 
@@ -18,7 +18,7 @@ HttpResponse::HttpResponse()
       version(http11),
       headers() {
     headers["Date"] = getCurTime();
-    headers["Server"] = "WebServer/1.0";
+    headers["Server"] = "coxlong's WebServer/1.0";
 }
 
 HttpResponse::~HttpResponse() {}
@@ -60,13 +60,10 @@ void HttpResponse::parseURL(std::string URL) {
         return;
     }
     auto fileType = URL.substr(it);
-    LOG(ERROR) << "fileType=" << fileType;
     auto filename = wwwroot+URL;
-    LOG(ERROR) << "filename=" << filename;
     if(std::ifstream is{filename, std::ios::binary | std::ios::ate}) {
         status = S200;
         auto size=is.tellg();
-        LOG(ERROR) << "size=" << size;
         std::string str(size, '\0');
         is.seekg(0);
         if(!is.read(&str[0], size)) {

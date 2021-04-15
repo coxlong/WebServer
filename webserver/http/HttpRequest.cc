@@ -1,11 +1,10 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 19:32:03
- * @LastEditTime: 2021-04-15 21:30:06
+ * @LastEditTime: 2021-04-15 22:02:43
  */
 #include <sstream>
 #include <algorithm>
-
 
 #include <webserver/http/HttpRequest.h>
 #include <webserver/net/SocketUtils.h>
@@ -37,7 +36,6 @@ bool HttpRequest::init(int fd) {
         std::regex ws_re(SPACE);
         std::vector<std::string> line(std::sregex_token_iterator(firstLine.begin(), firstLine.end(), ws_re, -1), std::sregex_token_iterator());
         if(line.size() == 3) {
-            LOG(ERROR) << "line[0]" << line[0];
             // 设置请求行
             if(line[0]=="GET") {
                 method = GET;
@@ -52,7 +50,6 @@ bool HttpRequest::init(int fd) {
             }
 
             // 设置请求头部
-            // auto len = buf.size();
             i += 2;
             std::regex ws_re2(COLON);
             int content_length = 0;
@@ -77,7 +74,6 @@ bool HttpRequest::init(int fd) {
                 } else if(j==std::string::npos) {
                     // 继续从socket读入
                     continue;
-                    // j = len;
                 }
                 auto k=buf.find(COLON, i);
                 if(k>i && k<j) {
@@ -85,7 +81,6 @@ bool HttpRequest::init(int fd) {
                     std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
                     headers[tmp] = buf.substr(k+1, j-k-1);
                 } else {
-                    // method = Invalid;
                     return false;
                 }
                 i=j+2;
