@@ -1,10 +1,8 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-11 10:45:36
- * @LastEditTime: 2021-04-12 23:20:49
+ * @LastEditTime: 2021-04-16 21:14:27
  */
-
-
 #include <webserver/net/TCPServer.h>
 #include <webserver/net/SocketUtils.h>
 #include <webserver/net/EventLoop.h>
@@ -38,16 +36,17 @@ void TCPServer::start() {
 }
 
 void TCPServer::newConnection() {
-    std::string peerInfo;
-    auto connFd = acceptConn(listenFd, peerInfo);
-    if(connFd < 0) {
-        LOG(ERROR) << "acceptConn error!";
-    } else {
-        LOG(ERROR) << "new connection; peer is " << peerInfo;
-        auto nextLoop = eventLoopThreadPool->getNextLoop();
-        auto channelPtr=std::make_shared<Channel>(nextLoop, connFd);
-        // 不能传递强指针给回调函数，否则造成内存泄漏
-        channelPtr->setReadCallback(std::bind(connReadCallback, ChannelWeakPtr(channelPtr)));
-        nextLoop->queueInLoop(std::bind(&Channel::enableReading, channelPtr));
+    while(true) {
+        auto connFd = acceptConn(listenFd);
+        if(connFd < 0) {
+            break;
+        } else {
+            auto nextLoop = eventLoopThreadPool->getNextLoop();
+            auto channelPtr=std::make_shared<Channel>(nextLoop, connFd);
+            // 不能传递强指针给回调函数，否则造成内存泄漏
+            channelPtr->setReadCallback(std::bind(connReadCallback, ChannelWeakPtr(channelPtr)));
+            channelPtr->setEpollET();
+            nextLoop->queueInLoop(std::bind(&Channel::enableReading, channelPtr));
+        }
     }
 }

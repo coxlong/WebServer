@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:51
- * @LastEditTime: 2021-04-12 23:19:39
+ * @LastEditTime: 2021-04-16 20:01:56
  */
 #pragma once
 #include <memory>
@@ -56,6 +56,7 @@ private:
     bool callingPendingFunctors;
     const int wakeupFd;
     ChannelPtr wakeupChannel;
+    std::string wBuf;
 };
 }
 }

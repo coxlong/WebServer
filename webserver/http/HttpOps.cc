@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-13 18:32:10
- * @LastEditTime: 2021-04-15 21:55:04
+ * @LastEditTime: 2021-04-16 21:25:08
  */
 #include <glog/logging.h>
 
@@ -19,7 +19,7 @@ void http::handleRead(ChannelWeakPtr channelWeakPtr) {
     auto channelPtr = channelWeakPtr.lock();
     if(channelPtr) {
         auto connFd = channelPtr->getFd();
-        LOG(ERROR) << "connfd=" << connFd;
+        // LOG(ERROR) << "connfd=" << connFd;
         auto loop = channelPtr->getOwnerLoop();
         HttpRequest request;
         if(request.init(connFd)) {            

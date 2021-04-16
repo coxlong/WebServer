@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 18:46:10
- * @LastEditTime: 2021-04-15 21:53:09
+ * @LastEditTime: 2021-04-16 19:35:11
  */
 #include <fstream>
 
@@ -61,6 +61,7 @@ void HttpResponse::parseURL(std::string URL) {
     }
     auto fileType = URL.substr(it);
     auto filename = wwwroot+URL;
+    // LOG(ERROR) << filename;
     if(std::ifstream is{filename, std::ios::binary | std::ios::ate}) {
         status = S200;
         auto size=is.tellg();

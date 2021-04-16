@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:59
- * @LastEditTime: 2021-04-12 23:12:11
+ * @LastEditTime: 2021-04-16 21:06:43
  */
 #include <sys/eventfd.h>
 
@@ -24,7 +24,8 @@ EventLoop::EventLoop()
       mutex(),
       callingPendingFunctors(false),
       wakeupFd(createEventFd()),
-      wakeupChannel(std::make_shared<Channel>(this, wakeupFd)) {
+      wakeupChannel(std::make_shared<Channel>(this, wakeupFd)),
+      wBuf(8, '\0') {
     assert(t_eventLoop == nullptr);
     t_eventLoop = this;
     wakeupChannel->setReadCallback(std::bind(&EventLoop::handleWakeup, this));
@@ -92,23 +93,24 @@ void EventLoop::doPendingFunctors() {
         functors.swap(pendingFunctors);
     }
     for(auto func:functors) {
-        LOG(ERROR) << "call func()";
         func();
     }
     callingPendingFunctors = false;
 }
 
 void EventLoop::wakeup() {
-    std::string one(8, '1');
-    if(sendMsg(wakeupFd, one) != static_cast<ssize_t>(one.size())) {
-        LOG(ERROR) << "wakeup failure";
+    static const std::string one(8, '1');
+    ssize_t ret;
+    if((ret=write(wakeupFd, one.data(), 8)) < 0) {
+        LOG(WARNING) << strerror(errno);
     }
 }
 
 void EventLoop::handleWakeup() {
-    std::string buf(8, '\0');
-    LOG(ERROR) << "wakeupFd=" << wakeupFd << " len=" << read(wakeupFd, &buf[0], buf.size());
-    // LOG(ERROR) << "wakeupFd=" << wakeupFd << " len=" << recvMsg(wakeupFd, buf);
+    ssize_t ret;
+    if((ret=read(wakeupFd, &wBuf[0], 8)) < 0) {
+        LOG(ERROR) << strerror(errno);
+    }
 }
 
 int EventLoop::createEventFd() {

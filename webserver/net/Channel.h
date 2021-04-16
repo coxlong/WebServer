@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:07
- * @LastEditTime: 2021-04-11 19:33:33
+ * @LastEditTime: 2021-04-16 21:13:37
  */
 #pragma once
 #include <functional>
@@ -38,6 +38,8 @@ public:
     void setRevents(const __uint32_t revents) {
         this->revents = revents;
     }
+
+    void setEpollET();
 
     void setReadCallback(const EventCallback callback) {
         readCallback = callback;

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 19:32:03
- * @LastEditTime: 2021-04-15 22:02:43
+ * @LastEditTime: 2021-04-16 21:21:12
  */
 #include <sstream>
 #include <algorithm>
@@ -22,9 +22,8 @@ HttpRequest::HttpRequest()
 }
 
 bool HttpRequest::init(int fd) {
-    std::string rbuf(4096, '\0');
+    std::string rbuf;
     auto len=recvMsg(fd, rbuf);
-    LOG(ERROR) << "len=" << len;
     if(len <= 0) {
         return false;
     }
@@ -36,6 +35,7 @@ bool HttpRequest::init(int fd) {
         auto firstLine=buf.substr(0, i);
         std::regex ws_re(SPACE);
         std::vector<std::string> line(std::sregex_token_iterator(firstLine.begin(), firstLine.end(), ws_re, -1), std::sregex_token_iterator());
+        // LOG(ERROR) << "line.size=" << line.size();
         if(line.size() == 3) {
             // 设置请求行
             if(line[0]=="GET") {

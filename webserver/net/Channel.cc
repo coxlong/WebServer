@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:14
- * @LastEditTime: 2021-04-15 22:03:12
+ * @LastEditTime: 2021-04-16 21:14:15
  */
 #include <sys/epoll.h>
 
@@ -42,9 +42,12 @@ void Channel::handleEvents() {
         }
     }
 }
+void Channel::setEpollET() {
+    events |= EPOLLET;
+}
 
 void Channel::enableReading() {
-    events |= (EPOLLIN | EPOLLPRI |EPOLLET);
+    events |= (EPOLLIN | EPOLLPRI);
     ownerLoop->updateChannel(shared_from_this());
 }
 
