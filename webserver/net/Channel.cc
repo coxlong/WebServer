@@ -44,7 +44,7 @@ void Channel::handleEvents() {
 }
 
 void Channel::enableReading() {
-    events |= (EPOLLIN | EPOLLPRI);
+    events |= (EPOLLIN | EPOLLPRI |EPOLLET);
     ownerLoop->updateChannel(shared_from_this());
 }
 

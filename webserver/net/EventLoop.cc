@@ -28,6 +28,7 @@ EventLoop::EventLoop()
     assert(t_eventLoop == nullptr);
     t_eventLoop = this;
     wakeupChannel->setReadCallback(std::bind(&EventLoop::handleWakeup, this));
+    wakeupChannel->setEvents(EPOLLIN | EPOLLPRI);
     wakeupChannel->enableReading();
 }
 
@@ -91,6 +92,7 @@ void EventLoop::doPendingFunctors() {
         functors.swap(pendingFunctors);
     }
     for(auto func:functors) {
+        LOG(ERROR) << "call func()";
         func();
     }
     callingPendingFunctors = false;
@@ -104,8 +106,9 @@ void EventLoop::wakeup() {
 }
 
 void EventLoop::handleWakeup() {
-    std::string buf;
-    recvMsg(wakeupFd, buf);
+    std::string buf(8, '\0');
+    LOG(ERROR) << "wakeupFd=" << wakeupFd << " len=" << read(wakeupFd, &buf[0], buf.size());
+    // LOG(ERROR) << "wakeupFd=" << wakeupFd << " len=" << recvMsg(wakeupFd, buf);
 }
 
 int EventLoop::createEventFd() {

@@ -43,7 +43,7 @@ void TCPServer::newConnection() {
     if(connFd < 0) {
         LOG(ERROR) << "acceptConn error!";
     } else {
-        LOG(INFO) << "new connection; peer is " << peerInfo;
+        LOG(ERROR) << "new connection; peer is " << peerInfo;
         auto nextLoop = eventLoopThreadPool->getNextLoop();
         auto channelPtr=std::make_shared<Channel>(nextLoop, connFd);
         // 不能传递强指针给回调函数，否则造成内存泄漏

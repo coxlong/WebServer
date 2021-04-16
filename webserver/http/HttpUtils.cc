@@ -40,7 +40,7 @@ SSMap http::cTypeMap {
 };
 
 
-const std::string http::wwwroot("/home/xlong/workspace/reference");
+const std::string http::wwwroot("/home/xlong/RemoteWorking/WebServer/html");
 
 std::string http::getCurTime() {
     auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

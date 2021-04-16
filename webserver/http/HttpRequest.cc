@@ -24,6 +24,7 @@ HttpRequest::HttpRequest()
 bool HttpRequest::init(int fd) {
     std::string rbuf(4096, '\0');
     auto len=recvMsg(fd, rbuf);
+    LOG(ERROR) << "len=" << len;
     if(len <= 0) {
         return false;
     }

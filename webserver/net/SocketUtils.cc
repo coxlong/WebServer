@@ -57,13 +57,25 @@ int closeConn(int sockfd) {
 ssize_t sendMsg(int connFd, std::string msg) {
     auto res = write(connFd, msg.c_str(), msg.length());
     if(res==-1) {
-        LOG(ERROR) << "wite error errno=" << errno;
+        LOG(ERROR) << strerror(errno);
     }
     return res;
 }
 
 ssize_t recvMsg(int connFd, std::string& buf) {
-    return read(connFd, &buf[0], buf.size());
+    ssize_t len;
+    ssize_t total=0;
+    LOG(ERROR) << "enter recvMsg";
+    while((len=recv(connFd, &buf[total], buf.size()-total, MSG_DONTWAIT))>0) {
+        LOG(ERROR) << "len=" << len;
+        total += len;
+    }
+    LOG(ERROR) << "connfd=" << connFd << " total=" << total << " len=" << len;
+    if(len<0) {
+        LOG(ERROR) << strerror(errno);
+    }
+    LOG(ERROR) << "leave recvMsg";
+    return total;
 }
 
 }
