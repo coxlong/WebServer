@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:22
- * @LastEditTime: 2021-04-11 21:47:39
+ * @LastEditTime: 2021-06-12 14:46:49
  */
 #pragma once
 #include <unordered_map>
@@ -10,6 +10,7 @@
 
 #include <webserver/utils/NonCopyable.h>
 #include <webserver/net/EventLoop.h>
+#include <webserver/utils/Allocator.h>
 
 namespace webserver {
 namespace net {
@@ -19,7 +20,7 @@ public:
     Epoll();
     ~Epoll();
 
-    std::vector<ChannelPtr> poll();
+    void poll(std::vector<ChannelPtr, Alloc<ChannelPtr>>& readyChannelPtrs);
     void updateChannel(ChannelPtr channelPtr);
     void removeChannel(const int fd);
 
@@ -29,8 +30,8 @@ public:
 
 private:
     const int epollFd;
-    std::unordered_map<int, ChannelPtr> channelPtrs;
-    std::vector<epoll_event> readyEvents;
+    std::unordered_map<int, ChannelPtr, std::hash<int>, std::equal_to<int>, Alloc< std::pair<const int, ChannelPtr> > > channelPtrs;
+    std::vector<epoll_event, Alloc<epoll_event>> readyEvents;
 };
 }
 }

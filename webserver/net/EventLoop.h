@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:51
- * @LastEditTime: 2021-04-16 20:01:56
+ * @LastEditTime: 2021-06-12 13:22:31
  */
 #pragma once
 #include <memory>
@@ -11,6 +11,7 @@
 
 #include <webserver/utils/NonCopyable.h>
 #include <webserver/utils/Thread.h>
+#include <webserver/utils/Allocator.h>
 
 namespace webserver {
 namespace net {
@@ -51,7 +52,7 @@ private:
     bool quited;
     bool eventHandling;
     const pthread_t threadId;
-    std::vector<Functor> pendingFunctors;
+    std::vector<Functor, Alloc<Functor>> pendingFunctors;
     Mutex mutex;
     bool callingPendingFunctors;
     const int wakeupFd;

@@ -54,6 +54,7 @@
         "random": "cpp",
         "bitset": "cpp",
         "regex": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "csignal": "cpp"
     }
 }

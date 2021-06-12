@@ -1,17 +1,13 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-11 16:02:00
- * @LastEditTime: 2021-04-16 21:43:20
+ * @LastEditTime: 2021-06-12 18:07:03
  */
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include<arpa/inet.h>
-#include <cstring>
+#include <arpa/inet.h>
 #include <unistd.h>
-#include <string>
-#include <iostream>
-#include <sstream>
 
 #include <glog/logging.h>
 
@@ -29,7 +25,7 @@ int initSocket() {
     sockaddr_in address;
     bzero(&address, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_port = htons(18080);
+    address.sin_port = htons(80);
     inet_pton(AF_INET, "", &address.sin_addr);
     
     if(bind(sockFd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1) {

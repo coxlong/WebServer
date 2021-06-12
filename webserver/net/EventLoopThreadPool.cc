@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-12 18:38:49
- * @LastEditTime: 2021-04-12 23:25:41
+ * @LastEditTime: 2021-06-12 17:34:18
  */
 #include <webserver/net/EventLoopThreadPool.h>
 #include <webserver/net/EventLoopThread.h>
@@ -22,7 +22,6 @@ EventLoopThreadPool::~EventLoopThreadPool() {}
 
 void EventLoopThreadPool::start() {
     for(int i=0; i<threadNum; ++i) {
-        LOG(INFO) <<"eventloopthreadpool::start" << i;
         auto tmp = std::make_shared<EventLoopThread>();
         loopThreads.push_back(tmp);
         loopVec.push_back(tmp->startLoop());

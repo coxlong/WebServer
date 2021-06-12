@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:59
- * @LastEditTime: 2021-04-16 21:06:43
+ * @LastEditTime: 2021-06-12 18:07:58
  */
 #include <sys/eventfd.h>
 
@@ -9,11 +9,13 @@
 #include <webserver/net/Epoll.h>
 #include <webserver/net/Channel.h>
 #include <webserver/net/SocketUtils.h>
+#include <webserver/utils/Allocator.h>
 
 using namespace webserver;
 using namespace webserver::net;
 
 __thread EventLoop* t_eventLoop = nullptr;
+__thread MemPool*   webserver::t_memPoolPtr = nullptr;
 
 EventLoop::EventLoop()
     : epollPtr(std::make_unique<Epoll>()),
@@ -48,10 +50,12 @@ void EventLoop::removeChannel(int fd) {
 }
 
 void EventLoop::loop() {
+    std::vector<ChannelPtr, Alloc<ChannelPtr>> readyChannelPtr;
     while(!quited) {
-        auto readyChannles = epollPtr->poll();
+        readyChannelPtr.clear();
+        epollPtr->poll(readyChannelPtr);
         eventHandling = true;
-        for(auto channel:readyChannles) {
+        for(auto& channel:readyChannelPtr) {
             channel->handleEvents();
         }
         doPendingFunctors();
@@ -86,13 +90,13 @@ int EventLoop::getChannelSize() {
 }
 
 void EventLoop::doPendingFunctors() {
-    std::vector<Functor> functors;
+    decltype(pendingFunctors) functors;
     callingPendingFunctors = true;
     {
         MutexLockGuard lock(mutex);
         functors.swap(pendingFunctors);
     }
-    for(auto func:functors) {
+    for(auto& func:functors) {
         func();
     }
     callingPendingFunctors = false;

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-11 10:45:36
- * @LastEditTime: 2021-04-16 21:14:27
+ * @LastEditTime: 2021-06-12 17:35:16
  */
 #include <webserver/net/TCPServer.h>
 #include <webserver/net/SocketUtils.h>
@@ -42,7 +42,7 @@ void TCPServer::newConnection() {
             break;
         } else {
             auto nextLoop = eventLoopThreadPool->getNextLoop();
-            auto channelPtr=std::make_shared<Channel>(nextLoop, connFd);
+            auto channelPtr=make_shared<Channel>(nextLoop, connFd);
             // 不能传递强指针给回调函数，否则造成内存泄漏
             channelPtr->setReadCallback(std::bind(connReadCallback, ChannelWeakPtr(channelPtr)));
             channelPtr->setEpollET();

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 22:04:49
- * @LastEditTime: 2021-06-12 10:02:01
+ * @LastEditTime: 2021-06-12 14:27:43
  */
 #include <signal.h>
 #include <glog/logging.h>
@@ -21,8 +21,9 @@ int main(int argc, char* argv[]) {
 
     InitSignalHandler();
 
-    webserver::net::EventLoop eventLoop;    
-    webserver::net::TCPServer server(&eventLoop, 1);
+
+    webserver::net::EventLoop eventLoop;
+    webserver::net::TCPServer server(&eventLoop, 10);
 
     server.start();
     LOG(ERROR) << "server start";

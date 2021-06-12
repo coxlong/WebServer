@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:30
- * @LastEditTime: 2021-06-12 10:17:55
+ * @LastEditTime: 2021-06-12 18:09:16
  */
 #include <webserver/net/Epoll.h>
 #include <webserver/net/Channel.h>
@@ -20,7 +20,7 @@ Epoll::Epoll()
 
 Epoll::~Epoll() {}
 
-std::vector<ChannelPtr> Epoll::poll() {
+void Epoll::poll(std::vector<ChannelPtr, Alloc<ChannelPtr>>& readyChannelPtr) {
     while(true) {
         auto readyEventsNum = epoll_wait(
             epollFd,
@@ -29,30 +29,27 @@ std::vector<ChannelPtr> Epoll::poll() {
             EpollWaitTime
         );
         if(readyEventsNum > 0) {
-            std::vector<ChannelPtr> res;
             decltype(channelPtrs.begin()) it;
             for(int i=0; i<readyEventsNum; ++i) {
                 auto fd = readyEvents[i].data.fd;
                 if((it=channelPtrs.find(fd)) != channelPtrs.end()) {
                     it->second->setRevents(readyEvents[i].events);
-                    res.emplace_back(it->second);
+                    readyChannelPtr.emplace_back(it->second);
                 } else {
                     LOG(ERROR) << "channel(fd=" << fd << ") not exists";
                 }
             }
-            return res;
+            return;
         } else if(readyEventsNum == 0) {            
             LOG(INFO) << "epoll_wait timeout!";
         } else {
             LOG(ERROR) << "epoll_wait error! errno=" << errno;
         }
     }
-    return std::vector<ChannelPtr>();
 }
 
 void Epoll::updateChannel(ChannelPtr channelPtr) {
     auto fd = channelPtr->getFd();
-    LOG(INFO) << "updateChannel: fd=" << fd;
     epoll_event event;
     event.data.fd = fd;
     event.events = channelPtr->getEvents();
@@ -64,7 +61,6 @@ void Epoll::updateChannel(ChannelPtr channelPtr) {
         } else {
             // 将channelPtr添加到channelPtrs
             channelPtrs[fd] = channelPtr;
-            LOG(INFO) << "epoll_add(fd=" << fd << ") successful!";
         }
     } else {
         // fd已存在，修改fd上的注册事件
@@ -78,11 +74,8 @@ void Epoll::removeChannel(const int fd) {
     if(channelPtrs.find(fd) != channelPtrs.end()) {
         if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
             LOG(ERROR) << "epoll_del error! errno=" << errno;
-        } else {
-            LOG(INFO) << "epoll_del successful!";
         }
         channelPtrs.erase(fd);
-        LOG(INFO) << "channel delete successful";
     } else {
         LOG(ERROR) << "channel not exists";
     }
