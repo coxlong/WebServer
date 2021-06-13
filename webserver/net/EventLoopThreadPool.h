@@ -1,13 +1,14 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-12 18:38:49
- * @LastEditTime: 2021-06-13 10:20:32
+ * @LastEditTime: 2021-06-13 19:33:05
  */
 #pragma once
 #include <vector>
 #include <memory>
 
 #include <webserver/utils/NonCopyable.h>
+#include <webserver/utils/Allocator.h>
 
 namespace webserver {
 namespace net {
@@ -23,7 +24,9 @@ public:
     void start();
     void stop();
 
-    std::shared_ptr<EventLoop> getNextLoop();
+    std::shared_ptr<EventLoop> getNextLoop() {
+        return loopVec[next = (next+1) % threadNum];
+    }
 private:
     std::shared_ptr<EventLoop> mainLoopPtr;
     const int threadNum;

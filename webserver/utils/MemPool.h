@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-06-12 11:14:39
- * @LastEditTime: 2021-06-13 18:47:40
+ * @LastEditTime: 2021-06-13 19:23:07
  */
 #pragma once
 #include <cstring>
@@ -60,9 +60,9 @@ private:
         obj* next;
         char client_data[1];
     };
-    enum {__ALIGN = 128};
+    enum {__ALIGN = 64};
     enum {__MAX_BYTES = 8192};
-    enum {__FREE_LIST_LEN = 64};
+    enum {__FREE_LIST_LEN = 128};
 
 private:
     size_t ROUND_UP(size_t bytes) {

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-12 18:38:49
- * @LastEditTime: 2021-06-13 10:24:26
+ * @LastEditTime: 2021-06-13 19:39:49
  */
 #include <webserver/net/EventLoopThreadPool.h>
 #include <webserver/net/EventLoopThread.h>
@@ -35,9 +35,4 @@ void EventLoopThreadPool::stop() {
         loopThreads[i]->quitLoop();
         loopThreads[i]->join();
     }
-}
-
-std::shared_ptr<EventLoop> EventLoopThreadPool::getNextLoop() {
-    next = (next+1) % threadNum;
-    return loopVec[next];
 }
