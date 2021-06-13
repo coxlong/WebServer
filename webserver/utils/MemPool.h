@@ -1,14 +1,17 @@
 /*
  * @Author: coxlong
  * @Date: 2021-06-12 11:14:39
- * @LastEditTime: 2021-06-12 17:42:29
+ * @LastEditTime: 2021-06-13 18:47:40
  */
 #pragma once
 #include <cstring>
 #include <iostream>
 #include <glog/logging.h>
 
+#include <webserver/utils/Thread.h>
+
 namespace webserver {
+
 class MemPool {
 public:
     explicit MemPool(int _n=1000) : __N_ONCE(_n) {
@@ -17,9 +20,17 @@ public:
         }
     }
 
+    ~MemPool() {
+        LOG(ERROR) << "~MemPool; memChunk.size=" << memChunk.size();
+        for(auto& p:memChunk) {
+            free(p);
+            p = nullptr;
+        }
+    }
+
     void* allocate(size_t n) {
         if(n>__MAX_BYTES) {
-            // LOG(ERROR) << "allocate, n=" << n;
+            // LOG(ERROR) << "allocate: " << n;
             return malloc(n);
         } else if(n>0) {
             auto fl_index = FREELIST_INDEX(n);
@@ -36,7 +47,6 @@ public:
 
     void deallocate(void* ptr, size_t n) {
         if(n>__MAX_BYTES) {
-            // LOG(ERROR) << "deallocate, n=" << n;
             free(ptr);
         } else if(n>0) {
             auto fl_index = FREELIST_INDEX(n);
@@ -50,9 +60,9 @@ private:
         obj* next;
         char client_data[1];
     };
-    enum {__ALIGN = 64};
+    enum {__ALIGN = 128};
     enum {__MAX_BYTES = 8192};
-    enum {__FREE_LIST_LEN = 128};
+    enum {__FREE_LIST_LEN = 64};
 
 private:
     size_t ROUND_UP(size_t bytes) {
@@ -63,12 +73,11 @@ private:
     }
 
     void chunk_alloc(size_t size, int nobjs) {
-        // LOG(ERROR) << "chunk_alloc: " << nobjs;
         char* mem = (char*)malloc(size * nobjs);
         if(mem == 0) {
-            std::cerr << "out of memory" << std::endl;
-            exit(-1);
+            LOG(FATAL) << "out of memory";
         }
+        memChunk.emplace_back((void*)mem);
         auto& head = free_list[FREELIST_INDEX(size)];
         head = (obj*)mem;
         auto cur = head;
@@ -82,5 +91,25 @@ private:
 private:
     obj* volatile free_list[__FREE_LIST_LEN];
     int __N_ONCE;
+    std::vector<void*> memChunk;
 };
+
+extern __thread  MemPool* t_memPoolPtr;
+
+class MemPoolRes {
+public:
+    MemPoolRes() {
+        if(t_memPoolPtr==nullptr) {
+            t_memPoolPtr = new MemPool();
+        }
+    }
+
+    ~MemPoolRes() {
+        if(t_memPoolPtr) {
+            delete t_memPoolPtr;
+            t_memPoolPtr = nullptr;
+        }
+    }
+};
+
 }

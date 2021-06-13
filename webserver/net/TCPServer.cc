@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-11 10:45:36
- * @LastEditTime: 2021-06-12 17:35:16
+ * @LastEditTime: 2021-06-13 17:58:36
  */
 #include <webserver/net/TCPServer.h>
 #include <webserver/net/SocketUtils.h>
@@ -13,16 +13,17 @@
 using namespace webserver;
 using namespace webserver::net;
 
-TCPServer::TCPServer(EventLoop* eventLoop, const int threadNum)
+TCPServer::TCPServer(std::shared_ptr<EventLoop> eventLoopPtr, const int threadNum)
     : listenFd(initSocket()),
-      eventLoop(eventLoop),
-      channelPtr(std::make_shared<Channel>(eventLoop, listenFd)),
+      eventLoopPtr(eventLoopPtr),
+      channelPtr(std::make_shared<Channel>(eventLoopPtr, listenFd)),
       threadNum(threadNum),
       connReadCallback(&webserver::http::handleRead),
-      eventLoopThreadPool(std::make_unique<EventLoopThreadPool>(eventLoop, threadNum)) {
+      eventLoopThreadPool(std::make_unique<EventLoopThreadPool>(eventLoopPtr, threadNum)) {
 }
 
-TCPServer::~TCPServer() {}
+TCPServer::~TCPServer() {
+}
 
 void TCPServer::start() {
     if(listenSocket(listenFd) == 0 ) {
@@ -35,6 +36,11 @@ void TCPServer::start() {
     channelPtr->enableReading();
 }
 
+void TCPServer::stop() {
+    eventLoopThreadPool->stop();
+    eventLoopPtr->quit();
+}
+
 void TCPServer::newConnection() {
     while(true) {
         auto connFd = acceptConn(listenFd);
@@ -42,7 +48,8 @@ void TCPServer::newConnection() {
             break;
         } else {
             auto nextLoop = eventLoopThreadPool->getNextLoop();
-            auto channelPtr=make_shared<Channel>(nextLoop, connFd);
+            // TODO
+            auto channelPtr=std::make_shared<Channel>(nextLoop, connFd);
             // 不能传递强指针给回调函数，否则造成内存泄漏
             channelPtr->setReadCallback(std::bind(connReadCallback, ChannelWeakPtr(channelPtr)));
             channelPtr->setEpollET();

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 22:04:49
- * @LastEditTime: 2021-06-12 14:27:43
+ * @LastEditTime: 2021-06-13 18:07:07
  */
 #include <signal.h>
 #include <glog/logging.h>
@@ -12,6 +12,12 @@ static void InitSignalHandler() {
     signal(SIGPIPE, SIG_IGN);
 }
 
+std::shared_ptr<webserver::net::TCPServer> g_serverPtr(nullptr);
+
+static void stop(int signo) {
+    g_serverPtr->stop();
+}
+
 int main(int argc, char* argv[]) {
     // Initialize Google’s logging library.
     google::InitGoogleLogging(argv[0]);
@@ -20,15 +26,20 @@ int main(int argc, char* argv[]) {
     // google::SetLogDestination(google::GLOG_FATAL, "./Debug/logtestFatal");
 
     InitSignalHandler();
+    signal(SIGINT, stop);
+    
+    auto eventLoopPtr = std::make_shared<webserver::net::EventLoop>();
+    eventLoopPtr->init();
 
+    auto serverPtr = std::make_shared<webserver::net::TCPServer>(eventLoopPtr, 10);
+    
+    g_serverPtr = serverPtr;
 
-    webserver::net::EventLoop eventLoop;
-    webserver::net::TCPServer server(&eventLoop, 10);
-
-    server.start();
+    serverPtr->start();
     LOG(ERROR) << "server start";
 
-    eventLoop.loop();
+    eventLoopPtr->loop();
+    LOG(ERROR) << "server stop";
     
     return 0;
 }

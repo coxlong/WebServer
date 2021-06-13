@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-12 18:38:49
- * @LastEditTime: 2021-04-12 21:45:21
+ * @LastEditTime: 2021-06-13 10:25:41
  */
 #pragma once
 
@@ -18,13 +18,15 @@ public:
     EventLoopThread();
     ~EventLoopThread();
 
-    EventLoop* startLoop();
+    std::shared_ptr<EventLoop> startLoop();
+    void quitLoop();
+    void join();
 
 private:
     void threadFunc();
 
 private:
-    EventLoop* eventLoop;
+    std::shared_ptr<EventLoop> eventLoop;
     Thread thread;
     Mutex mutex;
     Condition condition;

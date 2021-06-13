@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:14
- * @LastEditTime: 2021-06-12 17:32:27
+ * @LastEditTime: 2021-06-13 17:58:57
  */
 #include <sys/epoll.h>
 
@@ -12,8 +12,8 @@
 using namespace webserver;
 using namespace webserver::net;
 
-Channel::Channel(EventLoop* ownerLoop, const int fd)
-    : ownerLoop(ownerLoop),
+Channel::Channel(std::shared_ptr<EventLoop> ownerLoopPtr, const int fd)
+    : ownerLoopPtr(ownerLoopPtr),
       fd(fd),
       events(0),
       revents(0) {
@@ -48,10 +48,10 @@ void Channel::setEpollET() {
 
 void Channel::enableReading() {
     events |= (EPOLLIN | EPOLLPRI);
-    ownerLoop->updateChannel(shared_from_this());
+    ownerLoopPtr->updateChannel(shared_from_this());
 }
 
 void Channel::enableWriting() {
     events |= EPOLLOUT;
-    ownerLoop->updateChannel(shared_from_this());
+    ownerLoopPtr->updateChannel(shared_from_this());
 }

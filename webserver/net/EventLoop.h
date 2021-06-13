@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:51
- * @LastEditTime: 2021-06-12 13:22:31
+ * @LastEditTime: 2021-06-13 18:40:23
  */
 #pragma once
 #include <memory>
@@ -19,12 +19,15 @@ namespace net {
 class Epoll;
 class Channel;
 using ChannelPtr=std::shared_ptr<Channel>;
+using ChannelWeakPtr=std::weak_ptr<Channel>;
 using Functor=std::function<void()>;
 
-class EventLoop : NonCopyable {
+class EventLoop : NonCopyable, public std::enable_shared_from_this<EventLoop> {
 public:
     EventLoop();
     ~EventLoop();
+
+    void init();
 
     void updateChannel(ChannelPtr channelPtr);
     void removeChannel(int fd);
@@ -48,6 +51,7 @@ private:
     int createEventFd();
 
 private:
+    MemPoolRes memPoolRes;              // 内存池必须最先构造
     std::unique_ptr<Epoll> epollPtr;
     bool quited;
     bool eventHandling;
@@ -56,7 +60,6 @@ private:
     Mutex mutex;
     bool callingPendingFunctors;
     const int wakeupFd;
-    ChannelPtr wakeupChannel;
     std::string wBuf;
 };
 }

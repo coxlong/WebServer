@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-06-12 11:32:20
- * @LastEditTime: 2021-06-12 18:02:43
+ * @LastEditTime: 2021-06-13 18:40:06
  */
 #pragma once
 #include <climits>
@@ -11,7 +11,6 @@
 
 namespace webserver {
 
-extern __thread  MemPool* t_memPoolPtr;
 
 template <class T>
 class allocator {
@@ -30,10 +29,6 @@ public:
     };
 
     allocator() {
-        if(t_memPoolPtr == nullptr) {
-            LOG(ERROR) << "新建内存池";
-            t_memPoolPtr = new MemPool();
-        }
     }
 
     allocator(const allocator& other) {
@@ -44,8 +39,7 @@ public:
 
 public:
     pointer allocate(size_type n, const void* hint=0) {
-        auto tmp = t_memPoolPtr->allocate(n*sizeof(T));
-        return (pointer)tmp;        
+        return (pointer)t_memPoolPtr->allocate(n*sizeof(T)); 
     }
 
     void deallocate(pointer p, size_type n) {
@@ -81,5 +75,7 @@ make_shared(_Args&&... __args)
     return std::allocate_shared<_Tp>(Alloc<_Tp_nc>(),
                     std::forward<_Args>(__args)...);
 }
+
+typedef std::basic_string<char, std::char_traits<char>, Alloc<char>> string;
 
 }

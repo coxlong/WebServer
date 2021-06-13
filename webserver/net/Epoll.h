@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:22
- * @LastEditTime: 2021-06-12 14:46:49
+ * @LastEditTime: 2021-06-12 21:37:25
  */
 #pragma once
 #include <unordered_map>
@@ -23,6 +23,8 @@ public:
     void poll(std::vector<ChannelPtr, Alloc<ChannelPtr>>& readyChannelPtrs);
     void updateChannel(ChannelPtr channelPtr);
     void removeChannel(const int fd);
+
+    void clear();
 
     int getChannelSize() {
         return channelPtrs.size();

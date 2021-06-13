@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:07
- * @LastEditTime: 2021-06-12 12:18:10
+ * @LastEditTime: 2021-06-12 20:33:49
  */
 #pragma once
 #include <functional>
@@ -18,7 +18,7 @@ class Channel : NonCopyable, public std::enable_shared_from_this<Channel> {
 public:
     using EventCallback=std::function<void()>;
 
-    Channel(EventLoop* ownerLoop, const int fd);
+    Channel(std::shared_ptr<EventLoop> ownerLoopPtr, const int fd);
     ~Channel();
 
     void handleEvents();
@@ -48,10 +48,10 @@ public:
         writeCallback = callback;
     }
 
-    EventLoop* getOwnerLoop() const { return ownerLoop; }
+    std::shared_ptr<EventLoop> getOwnerLoop() const { return ownerLoopPtr; }
 
 private:
-    EventLoop* ownerLoop;
+    std::shared_ptr<EventLoop> ownerLoopPtr;
     const int fd;
     __uint32_t events;      // 注册事件
     __uint32_t revents;     // 就绪事件

@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:09:59
- * @LastEditTime: 2021-06-12 18:07:58
+ * @LastEditTime: 2021-06-13 10:29:58
  */
 #include <sys/eventfd.h>
 
@@ -14,8 +14,7 @@
 using namespace webserver;
 using namespace webserver::net;
 
-__thread EventLoop* t_eventLoop = nullptr;
-__thread MemPool*   webserver::t_memPoolPtr = nullptr;
+__thread MemPool* webserver::t_memPoolPtr = nullptr;
 
 EventLoop::EventLoop()
     : epollPtr(std::make_unique<Epoll>()),
@@ -26,17 +25,21 @@ EventLoop::EventLoop()
       mutex(),
       callingPendingFunctors(false),
       wakeupFd(createEventFd()),
-      wakeupChannel(std::make_shared<Channel>(this, wakeupFd)),
       wBuf(8, '\0') {
-    assert(t_eventLoop == nullptr);
-    t_eventLoop = this;
-    wakeupChannel->setReadCallback(std::bind(&EventLoop::handleWakeup, this));
-    wakeupChannel->setEvents(EPOLLIN | EPOLLPRI);
-    wakeupChannel->enableReading();
+}
+
+/*
+ * 初始化wakeupChannel，构造函数内不能调用shared_from_this
+ * EventLoop构造完成后调用此函数
+ */
+void EventLoop::init() {
+    auto channel = std::make_shared<Channel>(shared_from_this(), wakeupFd);
+    channel->setReadCallback(std::bind(&EventLoop::handleWakeup, this));
+    channel->setEvents(EPOLLIN | EPOLLPRI);
+    channel->enableReading();
 }
 
 EventLoop::~EventLoop() {
-    t_eventLoop = nullptr;
 }
 
 void EventLoop::updateChannel(ChannelPtr channelPtr) {
@@ -61,10 +64,14 @@ void EventLoop::loop() {
         doPendingFunctors();
         eventHandling = false;        
     }
+    epollPtr->clear();
 }
 
 void EventLoop::quit() {
     quited = true;
+    if(!isInLoopThread() || callingPendingFunctors) {
+        wakeup();
+    }
 }
 
 void EventLoop::runInLoop(Functor&& cb) {

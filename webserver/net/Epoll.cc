@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-10 10:10:30
- * @LastEditTime: 2021-06-12 18:09:16
+ * @LastEditTime: 2021-06-13 10:30:57
  */
 #include <webserver/net/Epoll.h>
 #include <webserver/net/Channel.h>
@@ -18,7 +18,8 @@ Epoll::Epoll()
     assert(epollFd > 0);
 }
 
-Epoll::~Epoll() {}
+Epoll::~Epoll() {
+}
 
 void Epoll::poll(std::vector<ChannelPtr, Alloc<ChannelPtr>>& readyChannelPtr) {
     while(true) {
@@ -43,7 +44,7 @@ void Epoll::poll(std::vector<ChannelPtr, Alloc<ChannelPtr>>& readyChannelPtr) {
         } else if(readyEventsNum == 0) {            
             LOG(INFO) << "epoll_wait timeout!";
         } else {
-            LOG(ERROR) << "epoll_wait error! errno=" << errno;
+            break;
         }
     }
 }
@@ -73,10 +74,15 @@ void Epoll::updateChannel(ChannelPtr channelPtr) {
 void Epoll::removeChannel(const int fd) {
     if(channelPtrs.find(fd) != channelPtrs.end()) {
         if(epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, nullptr) < 0) {
-            LOG(ERROR) << "epoll_del error! errno=" << errno;
+            LOG(ERROR) << "epoll_del error! errno=" << errno << " tid=" << CurrentThread::tid();
         }
         channelPtrs.erase(fd);
     } else {
         LOG(ERROR) << "channel not exists";
     }
+}
+
+void Epoll::clear() {
+    channelPtrs.clear();
+    readyEvents.clear();
 }

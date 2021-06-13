@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-12 18:38:49
- * @LastEditTime: 2021-06-12 12:35:10
+ * @LastEditTime: 2021-06-13 10:23:53
  */
 #include <webserver/net/EventLoopThread.h>
 #include <webserver/net/EventLoop.h>
@@ -16,17 +16,13 @@ EventLoopThread::EventLoopThread()
     : eventLoop(nullptr),
       thread(std::bind(&EventLoopThread::threadFunc, this)),
       mutex(),
-      condition() {    
+      condition() {
 }
 
 EventLoopThread::~EventLoopThread() {
-    if(eventLoop) {
-        eventLoop->quit();
-        thread.join();
-    }
 }
 
-EventLoop* EventLoopThread::startLoop() {
+std::shared_ptr<EventLoop> EventLoopThread::startLoop() {
     assert(!thread.isStarted());
     thread.start();
     {
@@ -38,15 +34,24 @@ EventLoop* EventLoopThread::startLoop() {
     return eventLoop;
 }
 
+void EventLoopThread::quitLoop() {
+    eventLoop->quit();
+    eventLoop = nullptr;
+}
+
+void EventLoopThread::join() {
+    thread.join();
+}
+
 void EventLoopThread::threadFunc() {
-    EventLoop newLoop;
+    std::shared_ptr<EventLoop> newLoopPtr = std::make_shared<EventLoop>();
+    newLoopPtr->init();
     {
         MutexLockGuard lock(mutex);
-        eventLoop = &newLoop;
+        eventLoop = newLoopPtr;
         condition.notify_one();
     }
-    newLoop.loop();
-    eventLoop = nullptr;
+    newLoopPtr->loop();
 }
 }
 }

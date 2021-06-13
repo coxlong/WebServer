@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-12 18:38:49
- * @LastEditTime: 2021-04-12 21:00:20
+ * @LastEditTime: 2021-06-13 10:20:32
  */
 #pragma once
 #include <vector>
@@ -17,17 +17,18 @@ class EventLoopThread;
 
 class EventLoopThreadPool : NonCopyable {
 public:
-    explicit EventLoopThreadPool(EventLoop* mainLoop, const int threadNum=5);
+    explicit EventLoopThreadPool(std::shared_ptr<EventLoop> mainLoopPtr, const int threadNum=5);
     ~EventLoopThreadPool();
 
     void start();
+    void stop();
 
-    EventLoop* getNextLoop();
+    std::shared_ptr<EventLoop> getNextLoop();
 private:
-    EventLoop* mainLoop;
+    std::shared_ptr<EventLoop> mainLoopPtr;
     const int threadNum;
     int next;
-    std::vector<EventLoop*> loopVec;
+    std::vector<std::shared_ptr<EventLoop>> loopVec;
     std::vector<std::shared_ptr<EventLoopThread>> loopThreads;
 };
 }
