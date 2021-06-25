@@ -1,7 +1,7 @@
 /*
  * @Author: coxlong
  * @Date: 2021-04-15 22:04:49
- * @LastEditTime: 2021-06-13 18:07:07
+ * @LastEditTime: 2021-06-14 11:00:24
  */
 #include <signal.h>
 #include <glog/logging.h>
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     auto eventLoopPtr = std::make_shared<webserver::net::EventLoop>();
     eventLoopPtr->init();
 
-    auto serverPtr = std::make_shared<webserver::net::TCPServer>(eventLoopPtr, 10);
+    auto serverPtr = std::make_shared<webserver::net::TCPServer>(eventLoopPtr, 4);
     
     g_serverPtr = serverPtr;
 
